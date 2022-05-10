@@ -8,17 +8,17 @@ const getList = () => {
   return axios.get(API_URL + "list", { headers: authHeader() });
 };
 
-const getItem = (hopperId) => {
-  return axios.get(API_URL + "detail?id="+hopperId, { headers: authHeader() });
+const getItem = (id) => {
+  return axios.get(API_URL + "detail?id="+id, { headers: authHeader() });
 };
-const deleteItem = (hopperId) => {
-  return axios.get(API_URL + "delete?id="+hopperId, { headers: authHeader() });
+const deleteItem = (id) => {
+  return axios.get(API_URL + "delete?id="+id, { headers: authHeader() });
 };
-const addItem = (hopperId,data) => {
+const addItem = (data) => {
   return axios.post(API_URL + "add",data, { headers: authHeader() });
 };
-const updateItem = (hopperId,data) => {
-  return axios.post(API_URL + "update?id"+hopperId,data, { headers: authHeader() });
+const updateItem = (id,data) => {
+  return axios.post(API_URL + "edit?id="+id,data, { headers: authHeader() });
 };
 
 export default {

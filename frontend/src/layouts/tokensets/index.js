@@ -37,7 +37,20 @@ import {
   useNavigate
 } from "react-router-dom"
 // Data
+const lstUpdatePeriod = [
+  {interval:60,title:"Every 1Hour"},
+  {interval:240,title:"Every 4Hours"},
+  {interval:1440,title:"Daily"},
+  {interval:10080,title:"Weekly"},
+  {interval:40320,title:"Monthly"}]
 
+function getPeriodName (interval){
+  let name ="";
+  lstUpdatePeriod.forEach(e=>{
+    if(Number(e.interval)==Number(interval)) name = e.title;
+  })
+  return(name)
+}
 function tokens() {
   
   let navigate = useNavigate();
@@ -56,19 +69,22 @@ function tokens() {
   async function process() {
     const tokensData = await TokensService.getList();
     let newData = [];
-    tokensData.data.map((hopper)=>{
+    tokensData.data.map((tokenset)=>{
       newData.push({
-        name : hopper.hoppername,
+        title : tokenset.title,
+        exchange:tokenset.exchange,
+        interval:getPeriodName(tokenset.updateperiod),
         action:<MDBox lineHeight={1} >
-                <MDButton variant="outlined" size="small" color="secondary" onClick={()=>doEdit(hopper.id)}>
+                <MDButton variant="outlined" size="small" color="secondary" onClick={()=>doEdit(tokenset.id)}>
                   Edit
                 </MDButton>&nbsp;
-                <MDButton variant="outlined" size="small" color="warning" onClick={()=>doDelete(hopper.id)}>
+                <MDButton variant="outlined" size="small" color="warning" onClick={()=>doDelete(tokenset.id)}>
                   Delete
                 </MDButton>
               </MDBox>
       })
     })
+    console.log(newData)
     setTokens(newData);
   }
 
@@ -79,7 +95,7 @@ function tokens() {
   const tokensColumns =[
       { Header: "Name", accessor: "title",  align: "left" },
       { Header: "Exchange", accessor: "exchange",  align: "left" },
-      { Header: "Comment", accessor: "comment",  align: "left" },
+      { Header: "Interval", accessor: "interval",  align: "left" },
       { Header: "Actions", accessor: "action", align: "center" },
     ];
   

@@ -1,4 +1,4 @@
-const db = require("../models");
+    const db = require("../models");
 
 exports.list = async(req, res) => {
 	const userId =req.userId;
@@ -16,7 +16,7 @@ exports.list = async(req, res) => {
 
 
 exports.detail = async(req, res) => {
-	const id =req.id;
+	const id =req.query.id;
 	db.tokenset.findOne({
 	    where: {
 	      id: id
@@ -25,12 +25,13 @@ exports.detail = async(req, res) => {
 	    res.send(tokenset);
   	 }
   	).catch(err => {
+  		console.log(err)
       res.send({});
     });
 } 
 
 exports.delete = async(req, res) => {
-	const id =req.id;
+	const id =req.query.id;
 	await db.tokenset.destroy({where:{id:id}});
 	res.send({});
 } 
@@ -45,7 +46,7 @@ exports.add = async(req, res) => {
 
 exports.edit = async(req, res) => {
 
-	const id = req.id;
+	const id = req.query.id;
 	let tokenset = await db.tokenset.findOne({where:{id:id}});
 	const datas =req.body;
 	tokenset = await tokenset.update(datas);

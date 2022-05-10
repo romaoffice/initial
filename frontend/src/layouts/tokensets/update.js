@@ -18,78 +18,124 @@ import Switch from '@mui/material/Switch';
 import MDTypography from "components/MDTypography";
 import { useEffect,useState } from "react";
 import checkMiddle from "../../services/middle.service";
-
+import tokenService from "../../services/token.service";
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import {
+  useNavigate
+} from "react-router-dom"
 import MDInput from "components/MDInput";
 import {
   useParams
 } from "react-router-dom"
 
+const exchanges = ["binance","kucoin"]
+const lstUpdatePeriod = [
+  {interval:60,title:"Every 1Hour"},
+  {interval:240,title:"Every 4Hours"},
+  {interval:1440,title:"Daily"},
+  {interval:10080,title:"Weekly"},
+  {interval:40320,title:"Monthly"}]
 
-function HopperUpdate() {
+function TokensetUpdate() {
   
   checkMiddle();
+  let navigate = useNavigate();
   let { id } = useParams();
 
-  const [name,setName] = useState("");
-  const [apikey,setApikey] = useState("");
-  const [secret,setSecret] = useState("");
-  const [testnet,setTestnet] = useState(false);
+  const [title,setTitle] = useState("");
+  const [exchange,setExchange] = useState("binance");
+  const [updateperiod,setUpdateperiod] = useState(1440);
+  const [comment,setComment] = useState("");
+  const initSet = {
+    mincapital:0
+  }
+  const [settings,setSettings] = useState(initSet);
 
+  const updateSettingField=(field,value)=>{
+    let json = {...settings}
+    json[field]=value;
+    setSettings(json)
+  }
   useEffect(()=>{
     const process = async()=>{
+      const tokenset = await tokenService.getItem(id)
+      if(tokenset.data){
+        setTitle(tokenset.data.title);
+        setExchange(tokenset.data.exchange);
+        setUpdateperiod(tokenset.data.updateperiod);
+        if(tokenset.settings){
+          setSettings(JSON.parse(tokenset.settings))
+        }
 
-      const exchange = await myexchange.getExchange(id)
-      if(exchange.data){
-        setName(exchange.data.exchangename);
-        setApikey(exchange.data.apikey);
-        setSecret(exchange.data.secret);
-        setTestnet(exchange.data.isdemo?exchange.data.isdemo:false);
+        console.log(settings)
       }
     }
     if(id!="Create"){
       process();
     }
   },[])
-
-  const enableConnect =  name!=="" && apikey!="" && secret!=""
   
-  const doConnect = async()=>{
-    if(enableConnect){
-      const rt = await myexchange.setExchange(name,apikey,secret,id,testnet);
-      if(rt.data.message){
-        window.alert("Please input correct api key");
-      }else{
-        window.location = "/dashboard"
-      }
+   const update = async()=>{
+      let rt;
+    if(id!="Create"){
+      rt = await tokenService.updateItem(id,{title,exchange,updateperiod});
+    }else{
+      rt = await tokenService.addItem({title,exchange,updateperiod});
     }
+    if(rt.data.message){
+      window.alert("Wrong input.Please check your input");
+    }else{
+      navigate("/tokensets", { replace: true });  
+    }
+
   }
   return(
     <DashboardLayout>
       <DashboardNavbar />
         <Grid container spacing={2}>
-          <Grid item xs={12}  md={12} lg={12}>
-            <MDTypography variant="caption" fontWeight="light">
-              Please input exchange api key and secret
-            </MDTypography>
+          <Grid item xs={12}>
+            <MDInput label="Title" value={title} onChange={(e)=>setTitle(e.target.value)} fullWidth/>                   
           </Grid>
-          <Grid item xs={12}  md={6} lg={3}>
-            <MDInput label="Name" value={name} onChange={(e)=>setName(e.target.value)} fullWidth/>                   
+          <Grid item xs={12}>
+            <MDInput label="Comment" value={comment} onChange={(e)=>setComment(e.target.value)} fullWidth/>                   
           </Grid>
-          <Grid item xs={12} md={6} lg={9}>
-           <MDInput label="Apikey"  value={apikey} onChange={(e)=>setApikey(e.target.value)} fullWidth/>                   
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel >Exchange</InputLabel>
+              <Select value={exchange} onChange={(e)=>setExchange(e.target.value)}  sx={{ height: "2.7em",width:"10em" }} label="Exchange">
+                {
+                  exchanges.map((exchange,idx)=>{
+                    return(
+                      <MenuItem key={idx} value={exchange}>{exchange}</MenuItem>
+                    )
+                  })
+                }
+              </Select>
+            </FormControl>
           </Grid>
-          <Grid item xs={12} md={6} lg={12}>
-           <MDInput label="secret" value={secret} onChange={(e)=>setSecret(e.target.value)} fullWidth/>                   
+          <Grid item xs={12}>
+            <FormControl >
+              <InputLabel >Update Interval</InputLabel>
+              <Select fullWidth value={updateperiod} onChange={(e)=>setUpdateperiod(e.target.value)}  sx={{ height: "2.7em",width:"10em" }} label="Update Interval">
+                {
+                  lstUpdatePeriod.map((updateItem,idx)=>{
+                    return(
+                      <MenuItem key={idx} value={updateItem.interval}>{updateItem.title}</MenuItem>
+                    )
+                  })
+                }
+              </Select>
+            </FormControl>
           </Grid>
-          <Grid item xs={12} md={6} lg={12}>
-          <Switch color="secondary"  checked={testnet} onChange={(e)=>setTestnet(event.target.checked)}/>
-          <MDTypography variant="button" color="secondary" p={1}>
-            {testnet?"This is for TestNet.":"This is for Live."}
-                         
-          </MDTypography>
+          <Grid item xs={12}>
+            <MDInput label="Min Capital" value={settings.mincapital} onChange={(e)=>updateSettingField("mincapital",e.target.value)} />                   
           </Grid>
+
           <Grid item xs={12} md={12} lg={12}>
-           <MDButton variant="contained" color="info" onClick={doConnect}>Connect</MDButton>       
+           <MDButton variant="contained" color="info" onClick={update}>Update</MDButton>       
           </Grid>
         </Grid>
     </DashboardLayout>   
@@ -97,4 +143,4 @@ function HopperUpdate() {
 
 }
 
-export default HopperUpdate;
+export default TokensetUpdate;

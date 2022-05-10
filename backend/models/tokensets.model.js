@@ -1,8 +1,11 @@
-module.exports = (sequelize, Sequelize) => {
+ module.exports = (sequelize, Sequelize) => {
   const Tokenset = sequelize.define("tokensets", {
   	title:{
   		type:Sequelize.STRING
-  	},
+  	}, 
+    updateperiod:{
+      type:Sequelize.INTEGER // minute
+    },
     exchange:{
       type:Sequelize.STRING
     },

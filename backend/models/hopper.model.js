@@ -6,9 +6,6 @@ module.exports = (sequelize, Sequelize) => {
     hoppername:{
       type:Sequelize.STRING
     },
-    updateperiod:{
-      type:Sequelize.INTEGER // minute
-    },
     tokensetId: {
       type: Sequelize.INTEGER
     },
